@@ -64,7 +64,9 @@ const UIController = (function () {
     inputType: '.add__type',
     inputDescription: '.add__description',
     inputValue: '.add__value',
-    inputAddBtn: '.add__btn'
+    inputAddBtn: '.add__btn',
+    incomeBlock: '.income__list',
+    expensesBlock: '.expenses__list'
   }
 
   return {
@@ -75,6 +77,51 @@ const UIController = (function () {
         value: document.querySelector(DOMStrings.inputValue).value
       }
     },
+
+    addListItem(obj, type) {
+      let html, elem;
+      // Create HTML string with placeholdeer text
+      if (type === 'inc') {
+        elem = DOMStrings.incomeBlock;
+        html =
+            `<div class="item clearfix" id="income-${obj.id}">
+                <div class="item__description">${obj.description}</div>
+                <div class="right clearfix">
+                    <div class="item__value">${obj.value}</div>
+                    <div class="item__delete">
+                        <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
+                    </div>
+                </div>
+              </div>`;
+      } else if (type === 'exp') {
+        elem = DOMStrings.expensesBlock;
+        html = 
+            `<div class="item clearfix" id="expense-${obj.id}">
+              <div class="item__description">${obj.description}</div>
+              <div class="right clearfix">
+                  <div class="item__value">${obj.value}</div>
+                  <div class="item__percentage">21%</div>
+                  <div class="item__delete">
+                      <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
+                  </div>
+              </div>
+            </div>`;
+      }
+      
+
+      document.querySelector(elem).insertAdjacentHTML('beforeend', html);
+    },
+
+    clearFields() {
+      const fields = document.querySelectorAll(DOMStrings.inputDescription + ', ' + DOMStrings.inputValue);
+      const fieldsArray = Array.prototype.slice.call(fields);
+
+      fieldsArray.forEach(field => {
+        field.value = '';
+      });
+      fieldsArray[0].focus();
+    },
+
     getDOMStrings() {
       return DOMStrings;
     }
@@ -92,27 +139,25 @@ const controller = (function (budgetCtrl, UICtrl) {
     document.querySelector(DOM.inputAddBtn).addEventListener('click', controllAddItem);
     document.addEventListener('keypress', function (event) {
       if (event.keyCode === 13 || event.which === 13) { //fot old browesers 'which'
-        controllAddItem()
+        controllAddItem();
       }
     });
   };
   
 
   function controllAddItem() {
-
     // 1. Get the field input data
     const input = UICtrl.getInput();
-    
     // 2. Add the ite to the budget controller
-    const newItem = budgetCtrl.addItem(input.type, input.description, input.value)
-
+    const newItem = budgetCtrl.addItem(input.type, input.description, input.value);
     // 3. Add the item to the UI
+    UICtrl.addListItem(newItem, input.type);
+    // 4. Clear fields
+    UICtrl.clearFields();
+    // 5. Calculate the budget
 
 
-    // 4. Calculate the budget
-
-
-    // 5. Diaplay the budget on the UI
+    // 6. Diaplay the budget on the UI
   }
 
   return {
@@ -125,6 +170,7 @@ const controller = (function (budgetCtrl, UICtrl) {
 })(budgetController, UIController);
 
 controller.init();
+
 //Сюда пишу все шаги. потом эти коменты стоит удаалить
 // 1. Разбил архитектуру проекта на 3 модуля 3 (IIEF): budgetController, UIController и controller
 // 2. Event по нажатию кнопки add__btn или по клавише Enter
@@ -136,3 +182,4 @@ controller.init();
 //   -------Класс для объектов expences и income
 //   ------- Объект data для хранения всех данных
 // 8. AddItem --- Добавляет новый объект с помощью классов в массивы объекта data
+// 9. Добавляем newItem на UI + очищение инпутов + фокус на 1 элемент
