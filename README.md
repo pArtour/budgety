@@ -1,2 +1,2 @@
-# budgety
+# Budgety
 My budget app
